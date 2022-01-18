@@ -1,7 +1,7 @@
 {
   "name": "loxberry-jwt-auth-server",
   "version": "0.0.1",
-  "description": "Loxberry JWT Authentication Server",
+  "description": "LoxBerry JWT Authentication Server",
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -29,6 +29,6 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/nufke/loxberry-jwt-auth-server"
+    "url": "https://github.com/nufke/loxberry-jwt-auth-server.git"
   }
 }
