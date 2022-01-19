@@ -4,6 +4,8 @@ module.exports = {
   // jwtRefreshExpiration: 86400, // 24 hours
 
   /* for test */
-  jwtExpiration: 60,           // 1 minute
-  jwtRefreshExpiration: 300,   // 5 minutes
+  jwtExpiration: 60,             // 1 minute
+  jwtRefreshExpiration: 300,     // 5 minutes
+
+  PORT: 3030 || process.env.PORT // Authentication server port
 };

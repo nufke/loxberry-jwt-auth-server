@@ -1,6 +1,8 @@
 const express = require("express");
 const cors = require("cors");
 const app = express();
+var dbConf = require('./app/config/db.config');
+var authConf = require('./app/config/auth.config');
 
 const allowedOrigins = [
   'capacitor://localhost',
@@ -33,29 +35,31 @@ app.use(express.urlencoded({ extended: true }));
 const db = require("./app/models");
 const Role = db.role;
 
-// uncomment for PostgreSQL database updates
-//db.sequelize.sync();
+if (dbConf.syncAtStartup) {
+  db.sequelize.sync().then( () => {
+    console.log('Sync database at startup');
+  });
+}
 
-// upcomment to drop and resyc database with roles.   
-// force: true will drop the table if it already exists
-//db.sequelize.sync({force: true}).then(() => {
-//  console.log('Drop and Resync Database with { force: true }');
-//  initial();
-//});
+if (dbConf.dropAndResync) {
+  db.sequelize.sync({force: true}).then(() => {
+    console.log('Drop and Resync database');
+    initial();
+  });
+}
 
-// simple route
+// public route to server root
 app.get("/", cors(corsOptions), (req, res) => {
   res.json({ message: "Loxberry Authentication Server." });
 });
 
-// routes
+// other routes
 require('./app/routes/auth.routes')(app);
 require('./app/routes/user.routes')(app);
 
-// set port, listen for requests
-const PORT = process.env.PORT || 3030;
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}.`);
+// listen for requests
+app.listen(authConf.PORT, () => {
+  console.log(`Server is running on port ${authConf.PORT}.`);
 });
 
 function initial() {
@@ -74,20 +78,3 @@ function initial() {
     name: "owner"
   });
 }
-/*
-  function initial() {
-    Role.create({
-      id: 1,
-      name: "user"
-    });
-   
-    Role.create({
-      id: 2,
-      name: "moderator"
-    });
-   
-    Role.create({
-      id: 3,
-      name: "admin"
-    });
-  } */
