@@ -12,7 +12,7 @@ exports.register = (req, res) => {
   User.create({
     username: req.body.username,
     email: req.body.email,
-    password: bcrypt.hashSync(req.body.password, 8)
+    password: bcrypt.hashSync(req.body.password, config.salt)
   })
     .then(user => {
       if (req.body.roles) {
@@ -47,7 +47,7 @@ exports.login = (req, res) => {
   })
     .then(async (user) => {
       if (!user) {
-        return res.status(404).send({ message: "Authorization failed. Error code 40." });
+        return res.status(404).send({ message: "Authorization failed. User not found." });
       }
 
       const passwordIsValid = bcrypt.compareSync(
@@ -58,7 +58,7 @@ exports.login = (req, res) => {
       if (!passwordIsValid) {
         return res.status(401).send({
           accessToken: null,
-          message: "Authorization failed. Error code 41."
+          message: "Authorization failed. Invalid password."
         });
       }
 
@@ -93,7 +93,7 @@ exports.refresh = async (req, res) => {
   const { refreshToken: requestToken } = req.body;
 
   if (requestToken == null) {
-    return res.status(403).json({ message: "Authentication failed. Error code 60." });
+    return res.status(403).json({ message: "Authentication failed. Refresh token required." });
   }
 
   try {
@@ -102,7 +102,7 @@ exports.refresh = async (req, res) => {
     console.log(refreshToken)
 
     if (!refreshToken) {
-      res.status(403).json({ message: "Authentication failed. Error code 61." });
+      res.status(403).json({ message: "Authentication failed. Refresh token not recognized." });
       return;
     }
 
@@ -110,7 +110,7 @@ exports.refresh = async (req, res) => {
       RefreshToken.destroy({ where: { id: refreshToken.id } });
       
       res.status(403).json({
-        message: "Authentication failed. Error code 62.",
+        message: "Authentication failed. Refresh token expired. Login again.",
       });
       return;
     }

@@ -7,17 +7,17 @@ const { TokenExpiredError } = jwt;
 
 const catchError = (err, res) => {
   if (err instanceof TokenExpiredError) {
-    return res.status(401).send({ message: "Unauthorized access. Error code 10." });
+    return res.status(401).send({ message: "Unauthorized access. Access Token expired." });
   }
 
-  return res.sendStatus(401).send({ message: "Unauthorized access. Error code 11." });
+  return res.sendStatus(401).send({ message: "Unauthorized access." });
 }
 
 const verifyToken = (req, res, next) => {
   let token = req.headers["x-access-token"];
 
   if (!token) {
-    return res.status(403).send({ message: "Unauthorized access. Error code 12." });
+    return res.status(403).send({ message: "Unauthorized access. No access token provided." });
   }
 
   jwt.verify(token, config.secret, (err, decoded) => {
@@ -40,7 +40,7 @@ const isOwner = (req, res, next) => {
       }
 
       res.status(403).send({
-        message: "Authentication failed. Error code 30."
+        message: "Authentication failed. Requires 'Owner' role."
       });
       return;
     });
@@ -58,7 +58,7 @@ const isFamily = (req, res, next) => {
       }
 
       res.status(403).send({
-        message: "Authentication failed. Error code 31."
+        message: "Authentication failed. Requires 'Family' role."
       });
     });
   });
@@ -80,7 +80,7 @@ const isFamilyOrOwner = (req, res, next) => {
       }
 
       res.status(403).send({
-        message: "Authentication failed. Error code 32."
+        message: "Authentication failed.  Requires 'Family' or 'Owner' role."
       });
     });
   });
@@ -92,4 +92,5 @@ const authJwt = {
   isFamily: isFamily,
   isFamilyOrOwner: isFamilyOrOwner
 };
+
 module.exports = authJwt;

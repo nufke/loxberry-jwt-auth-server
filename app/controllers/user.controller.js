@@ -1,15 +1,15 @@
 exports.allAccess = (req, res) => {
-  res.status(200).send("Public Content.");
+  res.status(200).send({ message: "Public Content."});
 };
 
 exports.guestBoard = (req, res) => {
-  res.status(200).send("Guest Content.");
+  res.status(200).send({ message: "Guest Content."});
 };
 
 exports.familyBoard = (req, res) => {
-  res.status(200).send("Family Content.");
+  res.status(200).send({ message: "Family Content."});
 };
 
 exports.ownerBoard = (req, res) => {
-  res.status(200).send("Owner Content.");
+  res.status(200).send({ message: "Owner Content."});
 };
