@@ -13,7 +13,7 @@ exports.register = (req, res) => {
     roles: req.body.roles
   }).write();
   userId++;
-  res.send({ message: "User '" + username + "' registered successfully!" });
+  res.send({ message: "User '" + req.body.username + "' registered successfully!" });
 };
 
 exports.login = async (req, res) => {
