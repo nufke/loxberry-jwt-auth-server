@@ -1,7 +1,6 @@
 const jwt = require("jsonwebtoken");
-const config = require("../config/auth.config.js");
+const config = require("../config");
 const db = require("../models");
-const User = db.user;
 
 const { TokenExpiredError } = jwt;
 
@@ -9,7 +8,6 @@ const catchError = (err, res) => {
   if (err instanceof TokenExpiredError) {
     return res.status(401).send({ message: "Unauthorized access. Access Token expired." });
   }
-
   return res.sendStatus(401).send({ message: "Unauthorized access." });
 }
 
@@ -29,60 +27,53 @@ const verifyToken = (req, res, next) => {
   });
 };
 
-const isOwner = (req, res, next) => {
-  User.findByPk(req.userId).then(user => {
-    user.getRoles().then(roles => {
-      for (let i = 0; i < roles.length; i++) {
-        if (roles[i].name === "owner") {
-          next();
-          return;
-        }
-      }
+const isOwner = async (req, res, next) => {
+  let user = await db.get('user').find({ id: req.userId }).value();
 
-      res.status(403).send({
-        message: "Authentication failed. Requires 'Owner' role."
-      });
+  for (let i = 0; i < user.roles.length; i++) {
+    if (user.roles[i] === "owner") {
+      next();
       return;
-    });
+    }
+  }
+
+  res.status(403).send({
+    message: "Authentication failed. Requires 'Owner' role."
   });
 };
 
-const isFamily = (req, res, next) => {
-  User.findByPk(req.userId).then(user => {
-    user.getRoles().then(roles => {
-      for (let i = 0; i < roles.length; i++) {
-        if (roles[i].name === "family") {
-          next();
-          return;
-        }
-      }
+const isFamily = async (req, res, next) => {
+  let user = await db.get('user').find({ id: req.userId }).value();
 
-      res.status(403).send({
-        message: "Authentication failed. Requires 'Family' role."
-      });
-    });
+  for (let i = 0; i < user.roles.length; i++) {
+    if (user.roles[i] === "family") {
+      next();
+      return;
+    }
+  }
+
+  res.status(403).send({
+    message: "Authentication failed. Requires 'Family' role."
   });
 };
 
-const isFamilyOrOwner = (req, res, next) => {
-  User.findByPk(req.userId).then(user => {
-    user.getRoles().then(roles => {
-      for (let i = 0; i < roles.length; i++) {
-        if (roles[i].name === "family") {
-          next();
-          return;
-        }
+const isFamilyOrOwner = async (req, res, next) => {
+  let user = await db.get('user').find({ id: req.userId }).value();
 
-        if (roles[i].name === "owner") {
-          next();
-          return;
-        }
-      }
+  for (let i = 0; i < roles.length; i++) {
+    if (user.roles[i] === "family") {
+      next();
+      return;
+    }
 
-      res.status(403).send({
-        message: "Authentication failed.  Requires 'Family' or 'Owner' role."
-      });
-    });
+    if (user.roles[i] === "owner") {
+      next();
+      return;
+    }
+  }
+
+  res.status(403).send({
+    message: "Authentication failed.  Requires 'Family' or 'Owner' role."
   });
 };
 

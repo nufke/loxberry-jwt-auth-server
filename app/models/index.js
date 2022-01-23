@@ -1,45 +1,30 @@
-const config = require("../config/db.config.js");
+const config = require("../config");
+const lowDb = require('lowdb')
+const FileSync = require('lowdb/adapters/FileSync')
 
-const Sequelize = require("sequelize");
-const sequelize = new Sequelize(
-  config.DB,
-  config.USER,
-  config.PASSWORD,
+const adapter = new FileSync(config.lowDbFile);
+const db = lowDb(adapter)
+
+// Set default data
+db.defaults({ 
+  user: [],
+  role: [
   {
-    host: config.HOST,
-    dialect: config.dialect,
-    storage: config.urlOrPath
+    id: 1,
+    name: "guest"
+  },
+  {
+    id: 2,
+    name: "family"
+  },
+  {
+    id: 3,
+    name: "owner"
   }
-);
+  ],
+  refreshToken: []
+}).write();
 
-const db = {};
-
-db.Sequelize = Sequelize;
-db.sequelize = sequelize;
-
-db.user = require("../models/user.model.js")(sequelize, Sequelize);
-db.role = require("../models/role.model.js")(sequelize, Sequelize);
-db.refreshToken = require("../models/refreshToken.model.js")(sequelize, Sequelize);
-
-db.role.belongsToMany(db.user, {
-  through: "user_roles",
-  foreignKey: "roleId",
-  otherKey: "userId"
-});
-
-db.user.belongsToMany(db.role, {
-  through: "user_roles",
-  foreignKey: "userId",
-  otherKey: "roleId"
-});
-
-db.refreshToken.belongsTo(db.user, {
-  foreignKey: 'userId', targetKey: 'id'
-});
-db.user.hasOne(db.refreshToken, {
-  foreignKey: 'userId', targetKey: 'id'
-});
-
-db.ROLES = ["guest", "family", "owner"];
+db.refreshToken = require("../models/refreshToken.model.js")(db);
 
 module.exports = db;

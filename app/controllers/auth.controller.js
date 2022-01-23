@@ -1,92 +1,58 @@
 const db = require("../models");
-const config = require("../config/auth.config");
-const { user: User, role: Role, refreshToken: RefreshToken } = db;
-
-const Op = db.Sequelize.Op;
-
+const config = require("../config");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 
+let userId = 1;
+
 exports.register = (req, res) => {
-  // Save User to Database
-  User.create({
+  db.get('user').push({
+    id: userId,
     username: req.body.username,
-    email: req.body.email,
-    password: bcrypt.hashSync(req.body.password, config.salt)
-  })
-    .then(user => {
-      if (req.body.roles) {
-        Role.findAll({
-          where: {
-            name: {
-              [Op.or]: req.body.roles
-            }
-          }
-        }).then(roles => {
-          user.setRoles(roles).then(() => {
-            res.send({ message: "User registered successfully!" });
-          });
-        });
-      } else {
-        // user role = 1
-        user.setRoles([1]).then(() => {
-          res.send({ message: "User registered successfully!" });
-        });
-      }
-    })
-    .catch(err => {
-      res.status(500).send({ message: err.message });
-    });
+    password: bcrypt.hashSync(req.body.password, config.salt),
+    roles: req.body.roles
+  }).write();
+  userId++;
+  res.send({ message: "User registered successfully!" });
 };
 
-exports.login = (req, res) => {
-  User.findOne({
-    where: {
-      username: req.body.username
-    }
-  })
-    .then(async (user) => {
-      if (!user) {
-        return res.status(404).send({ message: "Authorization failed. User not found." });
-      }
+exports.login = async (req, res) => {
+  let user = await db.get('user').find({ username: req.body.username }).value();
 
-      const passwordIsValid = bcrypt.compareSync(
-        req.body.password,
-        user.password
-      );
+  if (!user) {
+    return res.status(404).send({ message: "Authorization failed. User not found." });
+  }
 
-      if (!passwordIsValid) {
-        return res.status(401).send({
-          accessToken: null,
-          message: "Authorization failed. Invalid password."
-        });
-      }
+  const passwordIsValid = bcrypt.compareSync(
+    req.body.password,
+    user.password
+  );
 
-      const token = jwt.sign({ id: user.id }, config.secret, {
-        expiresIn: config.jwtExpiration
-      });
-
-      let refreshToken = await RefreshToken.createToken(user);
-
-      let authorities = [];
-      user.getRoles().then(roles => {
-        for (let i = 0; i < roles.length; i++) {
-          authorities.push("ROLE_" + roles[i].name.toUpperCase());
-        }
-
-        res.status(200).send({
-          id: user.id,
-          username: user.username,
-          email: user.email,
-          roles: authorities,
-          accessToken: token,
-          refreshToken: refreshToken,
-        });
-      });
-    })
-    .catch(err => {
-      res.status(500).send({ message: err.message });
+  if (!passwordIsValid) {
+    return res.status(401).send({
+      accessToken: null,
+      message: "Authorization failed. Invalid password."
     });
+  }
+
+  const accessToken = jwt.sign({ id: user.id }, config.secret, {
+    expiresIn: config.jwtExpiration
+  });
+
+  const refreshToken = await db.refreshToken.createToken(user);
+
+  let authorities = [];
+  for (let i = 0; i < user.roles.length; i++) {
+    authorities.push("ROLE_" + user.roles[i].toUpperCase());
+  }
+
+  res.status(200).send({
+    id: user.id,
+    username: user.username,
+    roles: authorities,
+    accessToken: accessToken,
+    refreshToken: refreshToken,
+  });
 };
 
 exports.refresh = async (req, res) => {
@@ -97,25 +63,23 @@ exports.refresh = async (req, res) => {
   }
 
   try {
-    let refreshToken = await RefreshToken.findOne({ where: { token: requestToken } });
-
-    console.log(refreshToken)
+    let refreshToken = await db.get('refreshToken').find({ token: requestToken }).value();
 
     if (!refreshToken) {
-      res.status(403).json({ message: "Authentication failed. Refresh token not recognized." });
+      res.status(403).json({ message: "Authentication failed. Refresh token not recognized. Login again." });
       return;
     }
 
-    if (RefreshToken.verifyExpiration(refreshToken)) {
-      RefreshToken.destroy({ where: { id: refreshToken.id } });
-      
+    if (db.refreshToken.verifyExpiration(refreshToken)) {
+      await db.get('refreshToken').remove({ token: refreshToken.token } ).write();
       res.status(403).json({
-        message: "Authentication failed. Refresh token expired. Login again.",
+        message: "Authentication failed. Refresh token expired. Login again."
       });
       return;
     }
 
-    const user = await refreshToken.getUser();
+    let userId = await refreshToken.userId;
+    let user = await db.get('user').find({ id: userId }).value();
     let newAccessToken = jwt.sign({ id: user.id }, config.secret, {
       expiresIn: config.jwtExpiration,
     });
@@ -125,6 +89,6 @@ exports.refresh = async (req, res) => {
       refreshToken: refreshToken.token,
     });
   } catch (err) {
-    return res.status(500).send({ message: err });
+    return res.status(500).send({ error: err });
   }
 };

@@ -9,9 +9,8 @@
   "keywords": [
     "express",
     "jwt",
-    "refresh token",
-    "authentication",
-    "authorization"
+    "loxberry",
+    "authentication"
   ],
   "author": "nufke",
   "license": "Apache-2.0",
@@ -20,13 +19,10 @@
     "cors": "^2.8.5",
     "express": "^4.17.1",
     "jsonwebtoken": "^8.5.1",
-    "sequelize": "^6.3.5",
-    "sqlite3": "^5.0.2",
+    "lowdb": "^1.0.0",
     "uuid": "^8.3.2"
   },
-  "devDependencies": {
-    "sequelize-cli": "^6.4.1"
-  },
+  "devDependencies": {},
   "repository": {
     "type": "git",
     "url": "https://github.com/nufke/loxberry-jwt-auth-server.git"

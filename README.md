@@ -1,6 +1,6 @@
 # LoxBerry JWT Authentication Server
 
-Light-weight Authentication Server using JWT Access and Refresh Tokens. Includes user registration and token administration using a SQLite database.
+Light-weight Authentication Server using JWT Access and Refresh Tokens. Includes user registration and token administration.
 
 The objective of the LoxBerry JWT Authentication Server is to offer user management, authentication and access for external applications (e.g. mobile Apps).
 
@@ -8,7 +8,7 @@ The objective of the LoxBerry JWT Authentication Server is to offer user managem
 
 ## Installation
 
-Environment requirements: `node.js` and  `sqlite`.
+Environment requirements: `npm` and `node.js`. Package dependencies are listed in `package.json`.
 
 ```
 npm install
@@ -16,7 +16,7 @@ npm install
 
 ## Configuration
 
-See `app/config/db.config.js` and `app/config/auth.config.js` to configure the database and authorization server options.
+See `app/config/index.js` for the configurtion options, such as server port, JSON database filename, etc. The
 
 ## Start the server
 ```
