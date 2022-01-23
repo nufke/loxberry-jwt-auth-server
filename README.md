@@ -16,9 +16,10 @@ npm install
 
 ## Configuration
 
-See `app/config/index.js` for the configurtion options, such as server port, JSON database filename, etc. The
+See `app/config/index.js` for the configurtion options, such as server port, JSON database filename, etc.
 
 ## Start the server
+
 ```
 node server.js
 ```
@@ -40,36 +41,35 @@ node server.js
 
 Example registration request using `POST localhost:3030/auth/register` with JSON body content:
 
-```
+```json
 {
     "username":"john",
-    "password":"1234",
+    "password":"<password>",
     "roles": ["family", "owner"]
 }
 ```
 
 Example registration response:
 
-```
+```json
 {
-    "message": "User registered successfully!"
+    "message": "User 'john' registered successfully!"
 }
 ```
 
 Example login request using `POST localhost:3030/auth/login` with JSON body content:
 
-```
+```json
 {
     "username":"john",
-    "password":"1234"
+    "password":"<password>"
 }
 ```
 
 Example login response: 
 
-```
+```json
 {
-    "id": 1,
     "username": "john",
     "roles": [
         "ROLE_FAMILY",
@@ -89,7 +89,7 @@ value: <accessToken received at login>
 
 Example request to renew accessToken when expired, using `POST localhost:3030/auth/refresh` with JSON body content:
 
-```
+```json
 {
     "refreshToken": "<refreshToken received at login>"
 }
@@ -97,7 +97,7 @@ Example request to renew accessToken when expired, using `POST localhost:3030/au
 
 Example response for accessToken renewal:
 
-```
+```json
 {
     "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiaWF0IjoxNjQyOTQzNDgwLCJleHAiOjE2NDI5NDM1NDB9.mQYk8zibogSOSE_IUZYI0sglTn9U9fgVyWr-6t7GTWI",
     "refreshToken": "27b33be3-b4b7-4760-a186-0c57c4cc2be2"
@@ -106,7 +106,7 @@ Example response for accessToken renewal:
 
 Example request to logout, using `POST localhost:3030/auth/logout` with JSON body content:
 
-```
+```json
 {
     "refreshToken": "<refreshToken received at login>"
 }
@@ -114,7 +114,7 @@ Example request to logout, using `POST localhost:3030/auth/logout` with JSON bod
 
 Example response for logout:
 
-```
+```json
 {
     "message": "Logout user 'john' completed."
 }

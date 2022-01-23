@@ -13,7 +13,7 @@ exports.register = (req, res) => {
     roles: req.body.roles
   }).write();
   userId++;
-  res.send({ message: "User registered successfully!" });
+  res.send({ message: "User '" + username + "' registered successfully!" });
 };
 
 exports.login = async (req, res) => {
@@ -47,7 +47,6 @@ exports.login = async (req, res) => {
   }
 
   res.status(200).send({
-    id: user.id,
     username: user.username,
     roles: authorities,
     accessToken: accessToken,
@@ -59,7 +58,7 @@ exports.refresh = async (req, res) => {
   const { refreshToken: requestToken } = req.body;
 
   if (requestToken == null) {
-    return res.status(403).json({ message: "Authentication failed. Refresh token required." });
+    return res.status(401).json({ message: "Authentication failed. Refresh token required." });
   }
 
   try {
@@ -113,7 +112,7 @@ exports.logout = async (req, res) => {
 
     await db.get('refreshToken').remove({ token: refreshToken.token } ).write();
    
-    res.status(403).json({
+    res.send({
       message: "Logout user " + user.username + " completed."
     });
     return;
