@@ -21,5 +21,7 @@ module.exports = function(app) {
 
   app.post("/auth/login", authController.login);
 
+  app.post("/auth/logout", authController.logout);
+
   app.post("/auth/refresh", authController.refresh);
 };

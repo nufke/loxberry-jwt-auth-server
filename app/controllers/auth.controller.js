@@ -92,3 +92,33 @@ exports.refresh = async (req, res) => {
     return res.status(500).send({ error: err });
   }
 };
+
+exports.logout = async (req, res) => {
+  const { refreshToken: requestToken } = req.body;
+
+  if (requestToken == null) {
+    return res.status(403).json({ message: "Logout failed. Refresh token required." });
+  }
+
+  try {
+    let refreshToken = await db.get('refreshToken').find({ token: requestToken }).value();
+
+    if (!refreshToken) {
+      res.status(403).json({ message: "Logout failed. Refresh token not recognized." });
+      return;
+    }
+
+    let userId = await refreshToken.userId;
+    let user = await db.get('user').find({ id: userId }).value();
+
+    await db.get('refreshToken').remove({ token: refreshToken.token } ).write();
+   
+    res.status(403).json({
+      message: "Logout user " + user.username + " completed."
+    });
+    return;
+
+  } catch (err) {
+    return res.status(500).send({ error: err });
+  }
+};
