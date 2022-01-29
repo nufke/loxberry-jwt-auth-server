@@ -31,4 +31,10 @@ module.exports = function(app) {
     userController.ownerBoard
   );
 
+  app.get(
+    "/mqtt_connectiondetails",
+    [authJwt.verifyToken],
+    userController.mqttBoard
+  );
+
 };
